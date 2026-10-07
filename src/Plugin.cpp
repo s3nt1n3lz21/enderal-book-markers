@@ -3,9 +3,6 @@
 #include "HotkeyConfig.h"
 #include "BookMarkerState.h"
 
-#define NOMINMAX
-#include <Windows.h>
-
 #include <algorithm>
 #include <array>
 #include <cmath>
