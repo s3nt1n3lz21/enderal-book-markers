@@ -17,8 +17,12 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
       - name: Build
         run: cmake --build build --parallel
-      - name: Test
+      - name: Test C++ state
         run: ctest --test-dir build --output-on-failure
+      - name: Test icon generator and build SWF
+        run: |
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          python3 tools/build_icon.py build/BookMarker.swf
 
   windows-plugin-build:
     runs-on: windows-latest
@@ -37,3 +41,22 @@ jobs:
         shell: pwsh
       - name: Build plugin
         run: cmake --build build --config Release --parallel
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Stage Vortex test package
+        shell: pwsh
+        run: |
+          $root = "dist/EnderalBookMarkers"
+          New-Item -ItemType Directory -Force "$root/SKSE/Plugins/DIII", "$root/Interface/EnderalBookMarkers" | Out-Null
+          $plugin = Get-ChildItem -Path build -Filter EnderalBookMarkers.dll -Recurse | Select-Object -First 1
+          if (-not $plugin) { throw "EnderalBookMarkers.dll was not produced" }
+          Copy-Item $plugin.FullName "$root/SKSE/Plugins/EnderalBookMarkers.dll"
+          Copy-Item "Data/SKSE/Plugins/DIII/EnderalBookMarkers.json" "$root/SKSE/Plugins/DIII/EnderalBookMarkers.json"
+          python tools/build_icon.py "$root/Interface/EnderalBookMarkers/BookMarker.swf"
+          Compress-Archive -Path "$root/*" -DestinationPath "dist/EnderalBookMarkers-test.zip" -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EnderalBookMarkers-test-package
+          path: dist/EnderalBookMarkers-test.zip
+          if-no-files-found: error
