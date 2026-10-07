@@ -1,12 +1,21 @@
 #include "BookContext.h"
 #include "DIIICompatibility.h"
+#include "HotkeyConfig.h"
 #include "BookMarkerState.h"
 
+#define NOMINMAX
+#include <Windows.h>
+
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <string>
 #include <vector>
 
 namespace
@@ -16,8 +25,32 @@ namespace
     constexpr std::uint32_t kRecordVersion = 1;
     constexpr std::uint32_t kMaximumSavedForms = 100000;
     constexpr std::uint32_t kDefaultHotkey = 0x40;          // F6 keyboard scan code
+    std::uint32_t g_hotkey = kDefaultHotkey;
 
     BookMarkerState g_markerState;
+
+    void LoadHotkey()
+    {
+        std::array<wchar_t, 32768> executablePath{};
+        const auto pathLength = GetModuleFileNameW(
+            nullptr, executablePath.data(), static_cast<DWORD>(executablePath.size()));
+        if (pathLength == 0 || pathLength >= executablePath.size()) {
+            return;
+        }
+
+        const std::filesystem::path executable(executablePath.data());
+        const auto iniPath = executable.parent_path() /
+            L"Data" / L"SKSE" / L"Plugins" / L"EnderalBookMarkers.ini";
+        std::ifstream ini(iniPath);
+        if (!ini) {
+            return;
+        }
+
+        const std::string contents(
+            std::istreambuf_iterator<char>(ini),
+            std::istreambuf_iterator<char>());
+        g_hotkey = HotkeyConfig::ParseToggleKey(contents, kDefaultHotkey);
+    }
 
     void SaveCallback(SKSE::SerializationInterface* serialization)
     {
@@ -187,7 +220,7 @@ namespace
             }
 
             const auto* button = (*event)->AsButtonEvent();
-            if (button && button->GetIDCode() == kDefaultHotkey && button->IsDown()) {
+            if (button && button->GetIDCode() == g_hotkey && button->IsDown()) {
                 ToggleCurrentBook();
             }
             return RE::BSEventNotifyControl::kContinue;
@@ -209,6 +242,7 @@ namespace
 SKSEPluginLoad(const SKSE::LoadInterface* skse)
 {
     SKSE::Init(skse);
+    LoadHotkey();
 
     if (const auto* serialization = SKSE::GetSerializationInterface()) {
         serialization->SetUniqueID(kSerializationID);
