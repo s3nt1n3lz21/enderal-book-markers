@@ -13,7 +13,7 @@ A planned SKSE mod for Enderal: Forgotten Stories Special Edition. It will let y
 
 ## Status
 
-Design and compatibility investigation are in progress. No working plugin or release archive is available yet. The exact Enderal, Skyrim runtime, SKSE, SkyUI, and icon-injector compatibility must be confirmed before implementation. The provided Steam screenshot shows the default public branch selected but does not identify its installed runtime.
+Design and compatibility investigation are in progress. No working plugin or release archive is available yet. The target is Enderal SE 2.0.12.4, which corresponds to Skyrim runtime 1.5.97. The exact local executable, SKSE, SkyUI, and icon-injector compatibility still need confirmation before implementation.
 
 ## Requirements
 
@@ -25,7 +25,7 @@ Not available yet. Vortex packaging will be provided for testing after the mod i
 
 ## Development
 
-See [the design specification](docs/superpowers/specs/2026-10-07-enderal-manual-book-marker-design.md) and [implementation plan](docs/superpowers/plans/2026-10-07-enderal-manual-book-marker.md).
+See the [runtime compatibility notes](docs/compatibility/enderal-se-runtime.md), [design specification](docs/superpowers/specs/2026-10-07-enderal-manual-book-marker-design.md), and [implementation plan](docs/superpowers/plans/2026-10-07-enderal-manual-book-marker.md).
 
 ## License
 
