@@ -1,5 +1,7 @@
+import json
 import struct
 import unittest
+from pathlib import Path
 
 from tools.build_icon import movie
 
@@ -46,6 +48,13 @@ class IconSwfTests(unittest.TestCase):
         count, character_id = struct.unpack_from("<HH", exports)
         self.assertEqual((count, character_id), (1, 2))
         self.assertEqual(exports[4:], b"EnderalBookMarker\0")
+
+    def test_diii_rule_adds_marker_without_replacing_native_read_icon(self) -> None:
+        config_path = Path("Data/SKSE/Plugins/DIII/EnderalBookMarkers.json")
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        rule = config["rules"][0]
+        self.assertEqual(rule["match"], {"formType": "Book", "personallyRead": True})
+        self.assertNotIn("replace", rule["icon"])
 
 
 if __name__ == "__main__":
