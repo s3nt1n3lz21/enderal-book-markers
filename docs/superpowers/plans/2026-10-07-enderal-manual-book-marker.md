@@ -9,9 +9,9 @@
 
 **Goal:** Build a Vortex-installable Enderal SE mod that manually toggles a persistent personal-read marker on books and displays a separate inventory icon beside SkyUI's built-in read icon.
 
-**Architecture:** A small SKSE plugin will resolve the selected/open book, toggle save-persistent marker state, and expose that state to the inventory UI. An inventory icon injector will render the marker if compatible with the player's Enderal runtime; otherwise the implementation will use a narrowly scoped SkyUI extension. Runtime compatibility is the first gate because Enderal SE received a major update in September 2026.
+**Architecture:** A CommonLibSSE-NG SKSE plugin resolves the selected/open book, toggles marker state in the SKSE co-save, and registers a custom condition with DIII. DIII's rule adds an exported SWF icon without a `replace` field, so the native `readIcon` is left intact. The selected-item path and icon placement still need in-game verification.
 
-**Tech Stack:** Enderal SE, SKSE, C++ SKSE plugin (CommonLibSSE or compatible alternative selected after runtime verification), SkyUI, compatible inventory icon injection, Vortex package.
+**Tech Stack:** Enderal SE 2.0.12.4 / expected Skyrim 1.5.97, SKSE, CommonLibSSE-NG, SkyUI, Dynamic Inventory Icon Injector (DIII), C++ and Python build/test tools, Vortex package.
 
 **Spec:** `docs/superpowers/specs/2026-10-07-enderal-manual-book-marker-design.md`
 
@@ -63,7 +63,7 @@ Confirm that both inventory selection and open-book context can be resolved, mar
 ### Task 2: Create the source repository and build skeleton
 
 **Files:**
-- Create: GitHub repository `s3nt1n3lz21/EnderalBookMarker`
+- Existing GitHub repository `s3nt1n3lz21/enderal-book-markers`
 - Create: `README.md`
 - Create: `.gitignore`
 - Create: `CMakeLists.txt` or the build manifest selected in Task 1
@@ -74,23 +74,23 @@ Confirm that both inventory selection and open-book context can be resolved, mar
 - Consumes: Task 1 compatibility record.
 - Produces: a buildable repository with documented runtime target and CI artifact output.
 
-- [ ] **Step 1: Use the existing empty GitHub repository**
+- [x] **Step 1: Use the existing GitHub repository**
 
-Create `EnderalBookMarker` under `s3nt1n3lz21`, with a README and license not auto-generated remotely so files can be committed together. Set visibility to public to support the stated eventual Nexus release; do not publish a Nexus page or mod archive at this stage.
+The user created the public `enderal-book-markers` repository under `s3nt1n3lz21`. Source work is on `dev/compatibility-and-plugin-skeleton`; the default `main` branch has not received the implementation.
 
-- [ ] **Step 2: Add the minimal plugin entry point and build configuration**
+- [x] **Step 2: Add the plugin entry point and build configuration**
 
-Add the SKSE plugin entry point and required runtime manifest for the exact version selected in Task 1. The plugin must report a clear startup log line with its version and detected runtime.
+Added a CommonLibSSE-NG plugin entry point, Windows CMake target, and vcpkg manifest. Startup logging is still to be added before a release build.
 
-- [ ] **Step 3: Add build verification**
+- [x] **Step 3: Add build verification**
 
-Add CI that builds the plugin for the selected runtime and uploads the compiled DLL as a build artifact. Keep game-specific assets and generated binaries out of source control.
+CI runs Linux unit/icon checks and attempts the Windows CommonLibSSE-NG build. After the build succeeds, it stages a test package and uploads it as an artifact. Generated SWF files and DLLs are kept out of source control.
 
 - [ ] **Step 4: Build locally and in CI**
 
 Run the documented local build and the GitHub Actions workflow. Expected: both produce the plugin DLL with no missing runtime dependency.
 
-- [ ] **Step 5: Commit repository skeleton**
+- [x] **Step 5: Commit repository skeleton**
 
 Commit the buildable skeleton and compatibility record before adding behavior.
 
@@ -107,27 +107,27 @@ Commit the buildable skeleton and compatibility record before adding behavior.
 - Consumes: runtime/plugin setup from Task 2.
 - Produces: `BookContext::GetCurrentBook() -> std::optional<FormID>` and `BookMarkerState::Toggle(FormID) -> bool`, where the returned value is `true` when marked and `false` when unmarked.
 
-- [ ] **Step 1: Write marker state tests**
+- [x] **Step 1: Write marker state tests**
 
 Test first toggle adds a form ID; second toggle removes it; another form remains independent; serialization round-trip restores the same set; empty or invalid serialized input yields an empty set.
 
-- [ ] **Step 2: Run tests and confirm they fail**
+- [x] **Step 2: Run tests and confirm they fail**
 
 Run the repository's C++ test target. Expected: tests fail because marker storage/toggle behavior is not implemented.
 
-- [ ] **Step 3: Implement marker set and serialization**
+- [x] **Step 3: Implement marker set and SKSE co-save serialization**
 
 Store unique base FormIDs using the save serialization mechanism selected in Task 1. Store only mod-owned data; do not mutate the game's built-in book read flag.
 
-- [ ] **Step 4: Implement book context resolution**
+- [x] **Step 4: Implement book context resolution**
 
 Resolve a supported book from the currently selected inventory item, or from the currently open book menu. Prefer the open-book context when that menu is active. Ignore non-book forms and absent context.
 
-- [ ] **Step 5: Implement configurable hotkey and feedback**
+- [ ] **Step 5: Implement configurable hotkey and feedback (prototype currently uses fixed F6)**
 
 Register one configurable default hotkey, allow rebinding through the selected configuration mechanism, and display a brief marked/unmarked confirmation. If no book is selected/open, do nothing. If context resolution fails, leave marker state unchanged.
 
-- [ ] **Step 6: Run tests and review changes**
+- [ ] **Step 6: Run tests and review changes (Linux tests pass; Windows plugin build is pending)**
 
 Run unit tests and build. Expected: all marker-state tests pass and the plugin loads without changing game read state.
 
@@ -143,11 +143,11 @@ Run unit tests and build. Expected: all marker-state tests pass and the plugin l
 - Consumes: `BookMarkerState::IsMarked(FormID) -> bool` from Task 3.
 - Produces: inventory UI displaying the custom icon only for personally marked book forms, positioned immediately to the right of the original read icon.
 
-- [ ] **Step 1: Define the custom icon asset**
+- [x] **Step 1: Define the custom icon asset**
 
 Use a distinct, legible monochrome marker icon that does not reuse or replace SkyUI's `readIcon`. Add its source asset and license/attribution information to the repository.
 
-- [ ] **Step 2: Connect per-book marker state to the UI**
+- [x] **Step 2: Connect per-book marker state to the UI**
 
 Use the selected injector's supported registration/config interface or the focused SkyUI extension to display the icon only when the book's personal marker state is set. Preserve the vanilla read indicator and all item-name text.
 
