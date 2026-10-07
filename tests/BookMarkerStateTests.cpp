@@ -1,4 +1,5 @@
 #include "BookMarkerState.h"
+#include "BookContext.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -49,6 +50,25 @@ void ClearRemovesAllMarkers()
     Check(state.MarkedForms().empty(), "clear empties marker state");
 }
 
+void OpenBookTakesPrecedenceOverInventorySelection()
+{
+    const auto selected = BookContext::Resolve(true, 0x1234, true, 0x5678);
+    Check(selected == 0x1234, "open book takes precedence over inventory selection");
+}
+
+void InventoryContextRequiresASelectedBook()
+{
+    const auto selected = BookContext::Resolve(false, 0, true, 0x5678);
+    Check(selected == 0x5678, "selected inventory book is resolved");
+    Check(!BookContext::Resolve(false, 0, true, 0), "empty inventory selection is ignored");
+}
+
+void MissingBookContextDoesNothing()
+{
+    Check(!BookContext::Resolve(false, 0, false, 0), "no active book context resolves to no form");
+    Check(!BookContext::Resolve(true, 0, false, 0), "open book without a resolvable form fails safely");
+}
+
 }
 
 int main()
@@ -57,5 +77,8 @@ int main()
     FormsAreIndependent();
     RestoreDropsInvalidAndDuplicateIds();
     ClearRemovesAllMarkers();
-    std::cout << "4 marker-state tests passed\n";
+    OpenBookTakesPrecedenceOverInventorySelection();
+    InventoryContextRequiresASelectedBook();
+    MissingBookContextDoesNothing();
+    std::cout << "7 marker-state and context tests passed\n";
 }
