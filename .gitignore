@@ -1,0 +1,11 @@
+/build/
+/out/
+/dist/
+*.dll
+*.pdb
+*.ilk
+*.obj
+*.exp
+*.lib
+*.skse
+*.log
