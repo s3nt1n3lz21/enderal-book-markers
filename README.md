@@ -13,13 +13,13 @@ An SKSE mod for Enderal: Forgotten Stories Special Edition. It lets you manually
 
 ## Development status
 
-The repository now has a C++ plugin prototype for the F6 toggle and save persistence, plus unit-tested marker-state and book-context logic. The separate inventory icon is not implemented yet. The prototype still needs a successful Windows build and testing in Enderal before it can be treated as usable.
+The repository now has a C++ plugin prototype for the F6 toggle, save persistence, and DIII marker condition, plus a DIII rule and a source generator for an original bookmark/check icon. The marker-state and generated-SWF structure have automated tests. The Windows plugin build and in-game behavior still need verification. F6 is currently fixed in the prototype; user remapping is not implemented yet.
 
 The target is Enderal SE 2.0.12.4, corresponding to Skyrim runtime 1.5.97. The exact local executable, installed SKSE and SkyUI versions, and in-game behavior still need confirmation.
 
 ## Requirements
 
-The plugin build uses CommonLibSSE-NG through vcpkg. Enderal SE and a compatible SKSE installation are required to run it. The planned separate inventory icon uses Dynamic Inventory Icon Injector (DIII); whether it works with the user's Enderal setup remains to be tested.
+The plugin build uses CommonLibSSE-NG through vcpkg. Enderal SE, compatible SKSE, SkyUI, and Dynamic Inventory Icon Injector (DIII) are required to run the current icon prototype. Compatibility with the user's Enderal setup remains to be tested.
 
 ## Build
 
@@ -40,7 +40,7 @@ ctest --test-dir build --output-on-failure
 
 ## Installation
 
-No Vortex-ready release archive is available yet. Vortex packaging and installation instructions will follow after the plugin build and in-game behavior are verified.
+The Windows CI job is set to create a test archive for Vortex after the plugin build succeeds. It is not a release; Enderal in-game verification is still required.
 
 ## Development references
 
