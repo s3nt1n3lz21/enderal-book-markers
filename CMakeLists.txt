@@ -4,6 +4,7 @@ project(EnderalBookMarkersTests LANGUAGES CXX)
 include(CTest)
 
 add_library(book_marker_state
+    src/BookContext.cpp
     src/BookMarkerState.cpp
 )
 target_include_directories(book_marker_state PUBLIC src)
