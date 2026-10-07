@@ -43,9 +43,10 @@ namespace
             return;
         }
 
-        const std::string contents(
-            std::istreambuf_iterator<char>(ini),
-            std::istreambuf_iterator<char>());
+        std::string contents;
+        for (char character; ini.get(character);) {
+            contents.push_back(character);
+        }
         g_hotkey = HotkeyConfig::ParseToggleKey(contents, kDefaultHotkey);
     }
 
