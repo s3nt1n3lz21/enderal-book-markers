@@ -1,30 +1,44 @@
 # Enderal SE runtime compatibility
 
-## Current target
+## Target
 
-- **Enderal SE:** 2.0.12.4, as identified by the user.
-- **Expected Skyrim runtime:** 1.5.97. Steam describes its 2.0.12.4 package as running Skyrim SE 1.5.97. The user's Steam screenshot showed the default public branch and installed content last updated September 9, 2026, before Steam's announced September 25, 2026 migration to Enderal 2.1.4.4 / Skyrim 1.7.104.
-- **Local executable confirmation:** pending. The game installation is not available in this workspace, so 1.5.97 remains a strong target inference rather than a direct read of `SkyrimSE.exe`.
-- **SKSE candidate:** 2.0.20 is the official SKSE build for runtime 1.5.97. The installed SKSE version has not been confirmed.
+- **Enderal SE:** 2.0.12.4, identified by the user.
+- **Expected Skyrim runtime:** 1.5.97. Steam maps its Enderal 2.0.12.4 package to Skyrim SE 1.5.97. The user's screenshot showed the default public branch and installed content last updated September 9, 2026, before the announced Steam migration to Enderal 2.1.4.4 / Skyrim 1.7.104.
+- **Local executable confirmation:** pending. The game installation is not available in this workspace, so the expected runtime is based on the selected Enderal branch/version rather than a direct read of `SkyrimSE.exe`.
+- **SKSE target:** 2.0.20 is the official SKSE build for runtime 1.5.97. The installed SKSE version has not been confirmed.
+- **Plugin framework:** CommonLibSSE-NG, targeting pre-AE Skyrim 1.5.x; SKSE co-save serialization for marker data.
 
-## Candidate inventory icon path
+## Prototype inventory icon route: DIII
 
-Dynamic Inventory Icon Injector (DIII) adds dynamic status icons to the inventory interface and has an API for SKSE plugin developers to register custom conditions. This fits the requirement for a separate personal-read status icon. Its currently published page does not clearly state support for Skyrim runtime 1.5.97, so runtime compatibility and Enderal behavior remain unverified. Do not make it a hard dependency or begin UI integration until this is confirmed.
+Use Dynamic Inventory Icon Injector (DIII) for the prototype. It adds status icons, supports multiple matching icons, and provides an SKSE plugin API for custom per-entry match conditions. Its `ICondition::Match` callback receives the inventory entry, so the marker plugin can check the entry's base form against its personal-read set. Our rule will add an icon without setting DIII's optional `replace: "readIcon"` field, preserving the built-in read indicator.
 
-Inventory Interface Information Injector (I4) injects item-type icons rather than status indicators. It may inform the UI architecture, but it does not by itself establish the required additional status icon path.
+The DIII download page does not itself clearly list 1.5.97 compatibility. However, the maintainer of a separate DIII integration reported testing on Skyrim 1.5.97 and published logs showing registration of the DIII plugin listener. This is useful compatibility evidence, but not a substitute for testing the current DIII version with Enderal.
 
-## Gates before plugin implementation
+## Context and persistence route
 
-1. Verify the installed `SkyrimSE.exe` file version is 1.5.97 and identify the installed SKSE and SkyUI versions.
-2. Confirm a compatible build of DIII can load on that runtime, or select a tested alternative that can add a conditional status icon beside SkyUI's read indicator.
-3. Confirm a supported way to resolve the selected book in inventory and the open book form, register the configurable hotkey, and serialize marker data per save.
-4. Record any UI reskin conflicts and test that the native read icon remains visible.
+- Open book: CommonLib exposes `BookMenu::GetTargetForm()`; a public SKSE plugin uses it to get the form currently displayed in the book menu.
+- Inventory selection: SkyUI's `InventoryMenu` exposes the selected entry's `formId` through its Scaleform object. The implementation can read the selected entry from the active menu's movie.
+- Hotkey: register an SKSE input event sink after `kInputLoaded`; configure the DirectInput scan code in a mod INI.
+- Save data: SKSE's serialization interface provides save/load/revert callbacks and form-ID resolution for co-save data.
 
-If a gate fails, update the design/plan with the supported route before implementing the affected component.
+These interfaces make the design implementable in a native plugin, but the menu paths and hotkey focus behavior still require in-game verification.
+
+## Remaining gates
+
+1. Confirm the installed `SkyrimSE.exe`, SKSE, and SkyUI versions when available.
+2. Build and load the plugin and current DIII release on the Enderal 2.0.12.4 installation.
+3. Verify the custom icon appears beside the native read icon and neither icon replaces the other.
+4. Test inventory selection and open-book hotkey routes, co-save persistence, and any UI reskin conflicts.
 
 ## Sources
 
-- [Steam: Enderal SE update announcement](https://store.steampowered.com/app/976620/Enderal_Forgotten_Stories/) — maps Enderal 2.0.12.4 to Skyrim 1.5.97 and Enderal 2.1.4.4 to Skyrim 1.7.104.
+- [Steam: Enderal SE update announcement](https://store.steampowered.com/app/976620/Enderal_Forgotten_Stories/) — maps 2.0.12.4 to Skyrim 1.5.97 and 2.1.4.4 to Skyrim 1.7.104.
 - [SKSE official site](https://skse.silverlock.org/) — lists SKSE 2.0.20 for game version 1.5.97.
-- [Dynamic Inventory Icon Injector (Nexus Mods)](https://www.nexusmods.com/skyrimspecialedition/mods/174136) — documents the dynamic status-icon feature and plugin API; runtime 1.5.97 compatibility still needs verification.
-- [Inventory Interface Information Injector (Nexus Mods)](https://www.nexusmods.com/skyrimspecialedition/mods/85702) — documents item-icon injection; a separate 1.5.97 port exists, but I4 is not itself a status-icon solution.
+- [CommonLibSSE-NG](https://github.com/CharmedBaryon/CommonLibSSE-NG) — supports pre-AE 1.5.x builds and exposes the SKSE interfaces used for serialization and plugin loading.
+- [DIII configuration and plugin API](https://github.com/JerryYOJ/Dynamic-Inventory-Icon-Injector-SKSE/blob/master/CONFIGURATION.md) — documents status icons, custom match conditions, and optional vanilla-icon replacement.
+- [DIII at Nexus Mods](https://www.nexusmods.com/skyrimspecialedition/mods/174136) — documents its status-icon function and dependencies.
+- [Known Spell Tomes Icon source](https://github.com/cbeaulieu-gt/skyrim_known_spells_icon) — example DIII condition integration with declared Skyrim 1.5.x support.
+- [Known Spell Tomes Icon posts](https://www.nexusmods.com/skyrimspecialedition/mods/174651?tab=posts) — author notes testing on 1.5.97 and includes a DIII listener-registration log.
+- [SkyUI source](https://github.com/schlangster/skyui/blob/master/src/ItemMenus/ItemMenu.as) — selected inventory entries used by the implementation.
+- [SKSE serialization interface](https://github.com/CharmedBaryon/CommonLibSSE-NG/blob/main/include/SKSE/Interfaces.h) — save/load/revert callbacks and form-ID resolution.
+- [BookMenu target form example](https://github.com/Sacralletius/ANDR_SKSEFunctions/blob/main/plugin.cpp) — retrieves the currently open book form.
