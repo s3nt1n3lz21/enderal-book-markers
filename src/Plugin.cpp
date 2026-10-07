@@ -1,4 +1,5 @@
 #include "BookContext.h"
+#include "DIIICompatibility.h"
 #include "BookMarkerState.h"
 
 #include <algorithm>
@@ -142,6 +143,38 @@ namespace
         RE::DebugNotification(marked ? "Book marked manually." : "Book marker removed.");
     }
 
+
+    class PersonalReadCondition final : public DIII::ICondition
+    {
+    public:
+        bool Match(RE::InventoryEntryData* entry) const override
+        {
+            if (!entry) {
+                return false;
+            }
+            const auto* object = entry->GetObject();
+            return object && object->As<RE::TESObjectBOOK>() &&
+                g_markerState.IsMarked(object->GetFormID());
+        }
+    };
+
+    void OnDIIIMessage(SKSE::MessagingInterface::Message* message)
+    {
+        if (!message || message->type != DIII::kMessage_GetAPI || !message->data) {
+            return;
+        }
+
+        auto* api = static_cast<DIII::IAPI*>(message->data);
+        if (api->GetVersion() < 1) {
+            return;
+        }
+        api->RegisterCondition(
+            "personallyRead",
+            [](const Json::Value&, RE::FormType) -> std::unique_ptr<DIII::ICondition> {
+                return std::make_unique<PersonalReadCondition>();
+            });
+    }
+
     class HotkeyListener final : public RE::BSTEventSink<RE::InputEvent*>
     {
     public:
@@ -186,6 +219,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
     if (const auto* messaging = SKSE::GetMessagingInterface()) {
         messaging->RegisterListener(OnSKSEMessage);
+        messaging->RegisterListener("DynamicInventoryIconInjector", OnDIIIMessage);
     }
     return true;
 }
