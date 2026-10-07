@@ -21,7 +21,7 @@ The DIII download page does not itself clearly list 1.5.97 compatibility. Howeve
 - Hotkey: the current prototype registers an SKSE input event sink after `kInputLoaded` and uses F6 (keyboard scan code `0x40`). User-configurable hotkey settings are not implemented yet.
 - Save data: SKSE's serialization interface provides save/load/revert callbacks and form-ID resolution for co-save data.
 
-The repository now contains a native plugin prototype for the hotkey toggle and SKSE co-save persistence, plus Linux-tested state/context code. The selected-entry Scaleform path and all runtime callbacks still need a successful Windows build and in-game verification. The DIII rule and custom icon asset are not implemented yet.
+The repository now contains a native plugin prototype for the hotkey toggle, SKSE co-save persistence, and DIII's custom marker condition. A DIII rule and original SWF icon generator are included, with automated tests for the marker state and SWF structure. The selected-entry Scaleform path, plugin build, and runtime callbacks still need in-game verification on Enderal. F6 is fixed in this prototype; user key remapping remains open.
 
 ## Remaining gates
 
