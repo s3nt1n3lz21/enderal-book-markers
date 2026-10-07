@@ -19,3 +19,21 @@ jobs:
         run: cmake --build build --parallel
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+  windows-plugin-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out vcpkg
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          ref: cc288af760054fa489574bd8e22d05aa8fa01e5c
+          path: vcpkg
+      - name: Bootstrap vcpkg
+        run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+      - name: Configure plugin
+        run: cmake -S . -B build -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:GITHUB_WORKSPACE\vcpkg\scripts\buildsystems\vcpkg.cmake"
+        shell: pwsh
+      - name: Build plugin
+        run: cmake --build build --config Release --parallel
