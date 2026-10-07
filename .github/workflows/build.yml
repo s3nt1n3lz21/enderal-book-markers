@@ -53,6 +53,7 @@ jobs:
           if (-not $plugin) { throw "EnderalBookMarkers.dll was not produced" }
           Copy-Item $plugin.FullName "$root/SKSE/Plugins/EnderalBookMarkers.dll"
           Copy-Item "Data/SKSE/Plugins/DIII/EnderalBookMarkers.json" "$root/SKSE/Plugins/DIII/EnderalBookMarkers.json"
+          Copy-Item "Data/SKSE/Plugins/EnderalBookMarkers.ini" "$root/SKSE/Plugins/EnderalBookMarkers.ini"
           python tools/build_icon.py "$root/Interface/EnderalBookMarkers/BookMarker.swf"
           Compress-Archive -Path "$root/*" -DestinationPath "dist/EnderalBookMarkers-test.zip" -Force
       - uses: actions/upload-artifact@v4
