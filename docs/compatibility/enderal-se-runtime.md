@@ -18,10 +18,10 @@ The DIII download page does not itself clearly list 1.5.97 compatibility. Howeve
 
 - Open book: CommonLib exposes `BookMenu::GetTargetForm()`; a public SKSE plugin uses it to get the form currently displayed in the book menu.
 - Inventory selection: SkyUI's `InventoryMenu` exposes the selected entry's `formId` through its Scaleform object. The implementation can read the selected entry from the active menu's movie.
-- Hotkey: register an SKSE input event sink after `kInputLoaded`; configure the DirectInput scan code in a mod INI.
+- Hotkey: the current prototype registers an SKSE input event sink after `kInputLoaded` and uses F6 (keyboard scan code `0x40`). User-configurable hotkey settings are not implemented yet.
 - Save data: SKSE's serialization interface provides save/load/revert callbacks and form-ID resolution for co-save data.
 
-These interfaces make the design implementable in a native plugin, but the menu paths and hotkey focus behavior still require in-game verification.
+The repository now contains a native plugin prototype for the hotkey toggle and SKSE co-save persistence, plus Linux-tested state/context code. The selected-entry Scaleform path and all runtime callbacks still need a successful Windows build and in-game verification. The DIII rule and custom icon asset are not implemented yet.
 
 ## Remaining gates
 
