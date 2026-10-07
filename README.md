@@ -13,13 +13,24 @@ An SKSE mod for Enderal: Forgotten Stories Special Edition. It lets you manually
 
 ## Development status
 
-The repository now has a C++ plugin prototype for the F6 toggle, save persistence, and DIII marker condition, plus a DIII rule and a source generator for an original bookmark/check icon. The marker-state and generated-SWF structure have automated tests. The Windows plugin build and in-game behavior still need verification. F6 is currently fixed in the prototype; user remapping is not implemented yet.
+The repository now has a C++ plugin prototype for a configurable hotkey toggle, save persistence, and DIII marker condition, plus a DIII rule and a source generator for an original bookmark/check icon. The marker-state, hotkey configuration, rule, and generated-SWF structure have automated tests. The Windows plugin build and in-game behavior still need verification.
 
 The target is Enderal SE 2.0.12.4, corresponding to Skyrim runtime 1.5.97. The exact local executable, installed SKSE and SkyUI versions, and in-game behavior still need confirmation.
 
 ## Requirements
 
 The plugin build uses CommonLibSSE-NG through vcpkg. Enderal SE, compatible SKSE, SkyUI, and Dynamic Inventory Icon Injector (DIII) are required to run the current icon prototype. Compatibility with the user's Enderal setup remains to be tested.
+
+## Hotkey configuration
+
+The default toggle is F6. Edit `Data/SKSE/Plugins/EnderalBookMarkers.ini` to change its keyboard scan code:
+
+```ini
+[Input]
+ToggleKey=0x40
+```
+
+The value may be decimal or `0x`-prefixed hexadecimal. The ini file is read beside the game's `Data` directory when the plugin loads.
 
 ## Build
 
