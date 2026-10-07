@@ -5,6 +5,7 @@ include(CTest)
 
 add_library(book_marker_state
     src/BookContext.cpp
+    src/HotkeyConfig.cpp
     src/BookMarkerState.cpp
 )
 target_include_directories(book_marker_state PUBLIC src)
@@ -15,8 +16,14 @@ add_executable(book_marker_state_tests
 )
 target_link_libraries(book_marker_state_tests PRIVATE book_marker_state)
 
+add_executable(hotkey_config_tests
+    tests/HotkeyConfigTests.cpp
+)
+target_link_libraries(hotkey_config_tests PRIVATE book_marker_state)
+
 if(BUILD_TESTING)
     add_test(NAME book_marker_state_tests COMMAND book_marker_state_tests)
+    add_test(NAME hotkey_config_tests COMMAND hotkey_config_tests)
 endif()
 
 if(WIN32)
@@ -25,6 +32,7 @@ if(WIN32)
         SOURCES
             src/Plugin.cpp
             src/BookContext.cpp
+            src/HotkeyConfig.cpp
             src/BookMarkerState.cpp
     )
     target_compile_features(EnderalBookMarkers PRIVATE cxx_std_23)
